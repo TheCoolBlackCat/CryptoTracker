@@ -80,13 +80,13 @@ export default class Home extends Component<Props, State> {
               columns={[
                 "Token",
                 "Holding",
-                "Total Buy",
+                "Total Cost",
                 "Price per token",
                 "Value",
                 "Profit/Loss",
                 "ROI",
-                "Predicted price/token",
-                "Predicted Value"
+                "Predicted price",
+                "Predicted value"
             ]}
             rows={data} />
           </div>
