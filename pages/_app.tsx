@@ -3,7 +3,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css"
 import "../styles/globals.css"
 import Head from "next/head"
 
-function App({ Component, pageProps }) {
+export default function App({ Component, pageProps }) {
   return (<div>
       <Head>
         <title>CryptoTracker</title>
@@ -13,5 +13,3 @@ function App({ Component, pageProps }) {
     </div>
   )
 }
-
-export default App

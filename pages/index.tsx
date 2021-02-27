@@ -49,7 +49,12 @@ export default class Home extends Component<Props, State> {
   }
 
   toggleDarkMode() {
-    this.setState({darkMode: !this.state.darkMode})
+    this.setState({darkMode: !this.state.darkMode}, () => {
+      if (this.state.darkMode)
+        window.document.body.classList.add("dark")
+      else
+        window.document.body.classList.remove("dark")
+    })
   }
 
   render() {
@@ -59,7 +64,7 @@ export default class Home extends Component<Props, State> {
       <div className="container">
         <div className="row">
           <div className="col-11">
-            <h1 className="display-1">CryptoTracker</h1>
+            <h1 className={`display-1 ${darkMode && "text-light"}`}>CryptoTracker</h1>
           </div>
           <div className="col-1">
             <button className={`btn ${darkMode ? "btn-dark" : "btn-light"}`} onClick={this.toggleDarkMode}>
