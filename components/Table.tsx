@@ -12,6 +12,7 @@ type State = {
   prediction: number
   quotes?: object
   loaded: boolean
+  errored: boolean
 }
 
 export default class Home extends Component<Props, State> {
@@ -19,21 +20,26 @@ export default class Home extends Component<Props, State> {
       super(props)
       this.state = {
           prediction: 1,
-          loaded: false
+          loaded: false,
+          errored: false
       }
       this.handleChange = this.handleChange.bind(this)
   }
 
   async componentDidMount() {
     const id = this.props.rows.map(row => row.api_id)
-    const res = await axios.get("/api/price", {
+    axios.get("/api/price", {
         params: {id: id.join(',')}
+    }).then(res => {
+        this.setState({
+            quotes: res.data,
+            loaded: true
+        })
+    }).catch(e => {
+        this.setState({errored: true})
+        console.error(e)
     })
-    console.log(res.data)
-    this.setState({
-        quotes: res.data,
-        loaded: true
-    })
+    
   }
 
   handleChange(e) {
@@ -57,8 +63,8 @@ export default class Home extends Component<Props, State> {
 
   render() {
     const {darkMode, columns} = this.props
-    const {prediction, loaded} = this.state
-    const loader = (
+    const {prediction, loaded, errored} = this.state
+    const loader = errored || (
         <div className="spinner-grow text-warning" role="status">
             <span className="visually-hidden">Loading...</span>
         </div>
@@ -66,6 +72,13 @@ export default class Home extends Component<Props, State> {
     const header = columns.map((column, i) => <th scope="col" key={i}>{column}</th>)
     const tableData = this.getData()
     const tableBody = tableData.map(row => {
+        const predictionInput = (
+            <td>
+                <label htmlFor="predictionInput" className="visually-hidden"></label>
+                <input type="number" step="0.1" min="0" className={`form-control form-control-sm ${darkMode ? "dark" : ""}`} id="predictionInput" value={prediction.toFixed(2)} onChange={this.handleChange} />
+            </td>
+        )
+        const predictionValue = <td>£{(prediction*row.holding).toFixed(4)}</td>
         if (loaded) {
             if (!row.price) return <tr></tr>
             return (
@@ -79,11 +92,8 @@ export default class Home extends Component<Props, State> {
                         <td className="text-success">+{row.profit.toFixed(4)}</td>:
                         <td className="text-danger">{row.profit.toFixed(4)}</td>}
                     <td>{`${row.ROI.toFixed(4)}%`}</td>
-                    <td>
-                        <label htmlFor="predictionInput" className="visually-hidden"></label>
-                        <input type="number" step="0.5" min="0" className="form-control form-control-sm" id="predictionInput" value={prediction.toFixed(2)} onChange={this.handleChange} />
-                    </td>
-                    <td>£{(prediction*row.holding).toFixed(4)}</td>
+                    {predictionInput}
+                    {predictionValue}
                 </tr>
             )
         }
@@ -92,7 +102,9 @@ export default class Home extends Component<Props, State> {
                 <td scope="row">{row.token}</td>
                 <td>{row.holding}</td>
                 <td>{row.buy}</td>
-                {Array.from({length: 5}, () => <td>{loader}</td>)}
+                {Array.from({length: 4}, () => <td>{loader}</td>)}
+                {predictionInput}
+                {predictionValue}
             </tr>
         )
     })
@@ -102,22 +114,29 @@ export default class Home extends Component<Props, State> {
     statsRow[2] = <th>{loaded ? `£${tableData.reduce((total, row) => total + row.buy, 0).toFixed(2)}` : loader}</th>
     statsRow[4] = <th>{loaded ? `£${tableData.reduce((total, row) => total + row.value, 0).toFixed(2)}` : loader}</th>
     statsRow[5] = <th className={`${totalProfit > 0 ? "text-success" : "text-danger"}`}>{loaded ? `£${totalProfit.toFixed(2)}` : loader}</th>
-    const stats = (
-        <tr>
-            {statsRow}
-        </tr>
-    )
 
     return (
         <table className={`table table-hover ${darkMode ? "table-dark" : ""}`}>
+            
             <thead>
+                {!errored ||
+                <tr>
+                    <td colSpan={9} className="text-danger" style={{background: "transparent"}}>
+                        <div className="alert alert-warning" role="alert">
+                            <strong>An error occurred fetching price data, try refreshing?</strong>
+                            <p>There could be a problem with the server, your internet connection or the API key.</p>
+                        </div>
+                    </td>
+                </tr>}
                 <tr>
                     {header}
                 </tr>
             </thead>
             <tbody>
                 {tableBody}
-                {stats}
+                <tr>
+                    {statsRow}
+                </tr>
             </tbody>
         </table>
     )
