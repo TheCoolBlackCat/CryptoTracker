@@ -40,28 +40,45 @@ export default class Home extends Component<Props, State> {
     this.setState({prediction: Number(e.currentTarget.value)})
   }
 
+  getData() {
+    const {props, state} = this
+    return props.rows.map(row => {
+        const price = state.quotes ? state.quotes[row.api_id] : 0
+        const value = row.holding * price
+        return {
+            ...row,
+            price: price,
+            value: value,
+            profit: value - row.buy,
+            ROI: (value / row.buy) * 100
+        }
+    })
+  }
+
   render() {
-    const {darkMode, columns, rows} = this.props
-    const {prediction, loaded, quotes} = this.state
+    const {darkMode, columns} = this.props
+    const {prediction, loaded} = this.state
+    const loader = (
+        <div className="spinner-grow text-warning" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
+    )
     const header = columns.map((column, i) => <th scope="col" key={i}>{column}</th>)
-    const tableBody = rows.map(row => {
+    const tableData = this.getData()
+    const tableBody = tableData.map(row => {
         if (loaded) {
-            const price = quotes[row.api_id]
-            const value = row.holding * price
-            const profit = value - row.buy
-            const ROI = (value / row.buy) * 100
-            if (!price) return <tr></tr>
+            if (!row.price) return <tr></tr>
             return (
                 <tr key={row.uuid}>
                     <td scope="row">{row.token}</td>
                     <td>{row.holding}</td>
                     <td>£{row.buy}</td>
-                    <td>£{price.toFixed(4)}</td>
-                    <td>£{(value).toFixed(4)}</td>
-                    {profit > 0 ?
-                        <td className="text-success">+{profit.toFixed(4)}</td>:
-                        <td className="text-danger">{profit.toFixed(4)}</td>}
-                    <td>{`${ROI.toFixed(4)}%`}</td>
+                    <td>£{row.price.toFixed(4)}</td>
+                    <td>£{(row.value).toFixed(4)}</td>
+                    {row.profit > 0 ?
+                        <td className="text-success">+{row.profit.toFixed(4)}</td>:
+                        <td className="text-danger">{row.profit.toFixed(4)}</td>}
+                    <td>{`${row.ROI.toFixed(4)}%`}</td>
                     <td>
                         <label htmlFor="predictionInput" className="visually-hidden"></label>
                         <input type="number" step="0.5" min="0" className="form-control form-control-sm" id="predictionInput" value={prediction.toFixed(2)} onChange={this.handleChange} />
@@ -70,24 +87,27 @@ export default class Home extends Component<Props, State> {
                 </tr>
             )
         }
-        const loader = (
-            <div className="spinner-grow text-warning" role="status">
-                <span className="visually-hidden">Loading...</span>
-            </div>
-        )
         return (
             <tr key={row.uuid}>
                 <td scope="row">{row.token}</td>
                 <td>{row.holding}</td>
                 <td>{row.buy}</td>
-                <td>{loader}</td>
-                <td>{loader}</td>
-                <td>{loader}</td>
-                <td>{loader}</td>
-                <td>{loader}</td>
+                {Array.from({length: 5}, () => <td>{loader}</td>)}
             </tr>
         )
     })
+
+    const statsRow = Array.from({length: 9}, () => <td></td>)
+    const totalProfit = tableData.reduce((total, row) => total + row.profit, 0)
+    statsRow[2] = <th>{loaded ? `£${tableData.reduce((total, row) => total + row.buy, 0).toFixed(2)}` : loader}</th>
+    statsRow[4] = <th>{loaded ? `£${tableData.reduce((total, row) => total + row.value, 0).toFixed(2)}` : loader}</th>
+    statsRow[5] = <th className={`${totalProfit > 0 ? "text-success" : "text-danger"}`}>{loaded ? `£${totalProfit.toFixed(2)}` : loader}</th>
+    const stats = (
+        <tr>
+            {statsRow}
+        </tr>
+    )
+
     return (
         <table className={`table table-hover ${darkMode ? "table-dark" : ""}`}>
             <thead>
@@ -97,6 +117,7 @@ export default class Home extends Component<Props, State> {
             </thead>
             <tbody>
                 {tableBody}
+                {stats}
             </tbody>
         </table>
     )
