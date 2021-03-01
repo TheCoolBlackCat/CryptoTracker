@@ -45,16 +45,33 @@ export default class Home extends Component<Props, State> {
     this.state = {
       darkMode: false
     }
+    this.setDarkMode = this.setDarkMode.bind(this)
     this.toggleDarkMode = this.toggleDarkMode.bind(this)
   }
 
+  componentDidMount() {
+    // Check for system preference for dark mode
+    const mediaQuery = '(prefers-color-scheme: dark)'
+    const systemDarkMode = (
+      window.matchMedia !== undefined &&
+      window.matchMedia(mediaQuery).media === mediaQuery)
+    const dmValue = window.localStorage.getItem("darkMode")
+    const lsDarkMode = dmValue === "on"
+    this.setState( // Local storage darkMode preference should override system
+      {darkMode: dmValue !== null ? lsDarkMode : systemDarkMode}, this.setDarkMode)
+  }
+
+  setDarkMode() {
+    const {darkMode} = this.state
+    if (darkMode)
+      window.document.body.classList.add("dark")
+    else
+      window.document.body.classList.remove("dark")
+    window.localStorage.setItem('darkMode', darkMode ? "on" : "off")
+  }
+
   toggleDarkMode() {
-    this.setState({darkMode: !this.state.darkMode}, () => {
-      if (this.state.darkMode)
-        window.document.body.classList.add("dark")
-      else
-        window.document.body.classList.remove("dark")
-    })
+    this.setState({darkMode: !this.state.darkMode}, this.setDarkMode)
   }
 
   render() {
@@ -64,7 +81,7 @@ export default class Home extends Component<Props, State> {
       <div className="container">
         <div className="row">
           <div className="col-11">
-            <h1 className={`display-1 ${darkMode && "text-light"}`}>CryptoTracker</h1>
+            <h1 className={`display-1 ${darkMode ? "text-light" : "text-dark"}`}>CryptoTracker</h1>
           </div>
           <div className="col-1">
             <button className={`btn ${darkMode ? "btn-dark" : "btn-light"}`} onClick={this.toggleDarkMode}>
