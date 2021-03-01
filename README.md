@@ -1,6 +1,10 @@
 # CryptoTracker
 A simple UI to track crypto holdings, with live prices and return data
 
+## Installation
+1. Make sure `node` and `yarn` are installed
+2. Run `yarn` in the project directory
+
 ## Getting Started
 1. Get an API Key from [CoinMarketCap](https://pro.coinmarketcap.com/signup)
 2. Export the API Key as an environment variable: `export CMC_API_KEY="XXXXX"`
