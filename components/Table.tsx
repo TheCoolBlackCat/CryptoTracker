@@ -56,7 +56,7 @@ export default class Home extends Component<Props, State> {
             price: price,
             value: value,
             profit: value - row.buy,
-            ROI: (value / row.buy) * 100
+            ROI: ((value - row.buy) / row.buy) * 100
         }
     })
   }
