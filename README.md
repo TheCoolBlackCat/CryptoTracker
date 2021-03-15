@@ -26,7 +26,7 @@ A simple UI to track crypto holdings, with live prices and return data
 ## Docker
 1. Create a production build with `yarn build`
 2. Build the image with `docker build -t crypto-tracker .`
-3. You can use `docker run -d --name crypto -p 8080:3000 crypto-tracker` to start the container (runs on localhost, port 8080)
+3. You can use `docker run -d --name crypto --restart unless-stopped -p 8080:3000 crypto-tracker` to start the container (runs on localhost, port 8080)
 4. Restart (if stopped) with `docker restart crypto`
 5. Stop and remove the container with `docker stop crypto && docker rm crypto`
 ### Updating the container

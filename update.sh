@@ -13,6 +13,7 @@ docker rm $CONTAINER || true
 echo "Restarting container with new image"
 docker run -d \
     --name $CONTAINER \
+    --restart unless-stopped \
     -p 8080:3000 \
     $IMAGE
 echo "Starting on http://localhost:8080"
