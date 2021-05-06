@@ -43,7 +43,7 @@ export default class Home extends Component<Props, State> {
     
   }
 
-  getData() {
+  getData(): [boolean, Currency[]] {
     const {props, state} = this
     return [!!state.quotes, props.rows.map(row => {
         const price = state.quotes ? state.quotes[row.api_id] : 0
@@ -83,7 +83,7 @@ export default class Home extends Component<Props, State> {
                         <td className="text-success">+{row.profit.toFixed(4)}</td>:
                         <td className="text-danger">{row.profit.toFixed(4)}</td>}
                     <td>{`${row.ROI.toFixed(4)}%`}</td>
-                    <Prediction {...{...row, darkMode, fiat}} />
+                    <Prediction {...{price: row.price, holding: row.holding, darkMode, fiat}} />
                 </tr>
             )
         }
