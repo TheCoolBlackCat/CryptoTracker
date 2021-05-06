@@ -8,7 +8,7 @@ A simple UI to track crypto holdings, with live prices and return data
 1. Get an API Key from [CoinMarketCap](https://pro.coinmarketcap.com/signup)
 2. Export the API Key as an environment variable: `export CMC_API_KEY="XXXXX"`
 3. Create a `data.yml` file containing your static portfolio data (see below)
-4. Run `yarn build`, `yarn dev`, etc.
+4. Run `yarn build && yarn start` or `yarn dev`
 ### Example data.yml file
 ```yaml
 ---
