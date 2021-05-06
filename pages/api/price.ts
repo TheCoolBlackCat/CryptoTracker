@@ -1,20 +1,27 @@
 import axios from "axios"
+import { Fiat } from "../../types"
 
 const URL = "https://pro-api.coinmarketcap.com/v1"
 
+const mapping = {
+  '£': "GBP",
+  '$': "USD"
+} //as ([Fiat]: string)
+
 export default (req, res) => {
+  const fiat = req.query.fiat || '£'
   axios.get(`${URL}/cryptocurrency/quotes/latest`, {
         headers: {
             "X-CMC_PRO_API_KEY": process.env.CMC_API_KEY
         },
         params: {
           id: req.query.id,
-          convert: "GBP"
+          convert: mapping[fiat]
         }
   }).then(apiRes => {
     const data = apiRes.data.data
     Object.keys(data).forEach(key => {
-      data[key] = data[key]["quote"]["GBP"]["price"]
+      data[key] = data[key]["quote"][mapping[fiat]]["price"]
     })
     res.status(200).json(data)
   }).catch(e => {

@@ -32,7 +32,7 @@ export default class Home extends Component<Props, State> {
   async componentDidMount() {
     const id = this.props.rows.map(row => row.api_id)
     axios.get("/api/price", {
-        params: {id: id.join(',')}
+        params: {id: id.join(','), fiat: this.props.fiat}
     }).then(res => {
         this.setState({
             quotes: res.data,
