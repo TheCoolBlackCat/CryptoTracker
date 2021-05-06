@@ -12,7 +12,6 @@ type Props = {
 
 type State = {
   quotes?: object
-  loaded: boolean
   error: boolean
 }
 
@@ -24,7 +23,6 @@ export default class Home extends Component<Props, State> {
   constructor(props: Props) {
       super(props)
       this.state = {
-          loaded: false,
           error: false
       }
   }
@@ -36,8 +34,7 @@ export default class Home extends Component<Props, State> {
         params: {id, fiat}
     }).then(res => {
         this.setState({
-            quotes: res.data,
-            loaded: true
+            quotes: res.data
         })
     }).catch(e => {
         this.setState({error: true})
@@ -48,7 +45,7 @@ export default class Home extends Component<Props, State> {
 
   getData() {
     const {props, state} = this
-    return props.rows.map(row => {
+    return [!!state.quotes, props.rows.map(row => {
         const price = state.quotes ? state.quotes[row.api_id] : 0
         const value = row.holding * price
         return {
@@ -58,20 +55,20 @@ export default class Home extends Component<Props, State> {
             profit: value - row.buy,
             ROI: ((value - row.buy) / row.buy) * 100
         }
-    })
+    })]
   }
 
   render() {
     const {darkMode, fiat, columns} = this.props
-    const {loaded, error: errored} = this.state
-    const loader = errored || (
+    const {error} = this.state
+    const loader = error || (
         <div className="spinner-grow text-warning" role="status">
             <span className="visually-hidden">Loading...</span>
         </div>
     )
     const sign = (x: string | number) => `${fiat}${x.toString()}`
     const header = columns.map((column, i) => <th scope="col" key={i}>{column}</th>)
-    const tableData = this.getData()
+    const [loaded, tableData] = this.getData()
     const tableBody = tableData.map(row => {
         if (loaded) {
             if (!row.price) return <tr></tr>
@@ -110,7 +107,7 @@ export default class Home extends Component<Props, State> {
         <table className={`table table-hover ${darkMode ? "table-dark" : ""}`}>
             
             <thead>
-                {!errored ||
+                {!error ||
                 <tr>
                     <td colSpan={9} className="text-danger" style={{background: "transparent"}}>
                         <div className="alert alert-warning" role="alert">
