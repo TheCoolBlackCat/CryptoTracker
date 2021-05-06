@@ -1,6 +1,7 @@
 import axios from "axios"
 import { Component } from "react"
 import { Currency } from "../types"
+import Prediction from "./Prediction"
 
 type Props = {
   darkMode: boolean
@@ -9,7 +10,6 @@ type Props = {
 }
 
 type State = {
-  prediction: number
   quotes?: object
   loaded: boolean
   errored: boolean
@@ -19,11 +19,9 @@ export default class Home extends Component<Props, State> {
   constructor(props: Props) {
       super(props)
       this.state = {
-          prediction: 1,
           loaded: false,
           errored: false
       }
-      this.handleChange = this.handleChange.bind(this)
   }
 
   async componentDidMount() {
@@ -40,10 +38,6 @@ export default class Home extends Component<Props, State> {
         console.error(e)
     })
     
-  }
-
-  handleChange(e) {
-    this.setState({prediction: Number(e.currentTarget.value)})
   }
 
   getData() {
@@ -63,7 +57,7 @@ export default class Home extends Component<Props, State> {
 
   render() {
     const {darkMode, columns} = this.props
-    const {prediction, loaded, errored} = this.state
+    const {loaded, errored} = this.state
     const loader = errored || (
         <div className="spinner-grow text-warning" role="status">
             <span className="visually-hidden">Loading...</span>
@@ -72,13 +66,6 @@ export default class Home extends Component<Props, State> {
     const header = columns.map((column, i) => <th scope="col" key={i}>{column}</th>)
     const tableData = this.getData()
     const tableBody = tableData.map(row => {
-        const predictionInput = (
-            <td>
-                <label htmlFor="predictionInput" className="visually-hidden"></label>
-                <input type="number" step="0.1" min="0" className={`form-control form-control-sm ${darkMode ? "dark" : ""}`} id="predictionInput" value={prediction.toFixed(2)} onChange={this.handleChange} />
-            </td>
-        )
-        const predictionValue = <td>£{(prediction*row.holding).toFixed(4)}</td>
         if (loaded) {
             if (!row.price) return <tr></tr>
             return (
@@ -92,8 +79,7 @@ export default class Home extends Component<Props, State> {
                         <td className="text-success">+{row.profit.toFixed(4)}</td>:
                         <td className="text-danger">{row.profit.toFixed(4)}</td>}
                     <td>{`${row.ROI.toFixed(4)}%`}</td>
-                    {predictionInput}
-                    {predictionValue}
+                    <Prediction {...{...row, darkMode}} />
                 </tr>
             )
         }
@@ -102,9 +88,7 @@ export default class Home extends Component<Props, State> {
                 <td scope="row">{row.token}</td>
                 <td>{row.holding}</td>
                 <td>{row.buy}</td>
-                {Array.from({length: 4}, () => <td>{loader}</td>)}
-                {predictionInput}
-                {predictionValue}
+                {Array.from({length: 6}, () => <td>{loader}</td>)}
             </tr>
         )
     })
