@@ -13,7 +13,7 @@ type Props = {
 type State = {
   quotes?: object
   loaded: boolean
-  errored: boolean
+  error: boolean
 }
 
 export default class Home extends Component<Props, State> {
@@ -25,21 +25,22 @@ export default class Home extends Component<Props, State> {
       super(props)
       this.state = {
           loaded: false,
-          errored: false
+          error: false
       }
   }
 
   async componentDidMount() {
-    const id = this.props.rows.map(row => row.api_id)
+    const {rows, fiat} = this.props
+    const id = rows.map(row => row.api_id).join(',')
     axios.get("/api/price", {
-        params: {id: id.join(','), fiat: this.props.fiat}
+        params: {id, fiat}
     }).then(res => {
         this.setState({
             quotes: res.data,
             loaded: true
         })
     }).catch(e => {
-        this.setState({errored: true})
+        this.setState({error: true})
         console.error(e)
     })
     
@@ -62,7 +63,7 @@ export default class Home extends Component<Props, State> {
 
   render() {
     const {darkMode, fiat, columns} = this.props
-    const {loaded, errored} = this.state
+    const {loaded, error: errored} = this.state
     const loader = errored || (
         <div className="spinner-grow text-warning" role="status">
             <span className="visually-hidden">Loading...</span>
