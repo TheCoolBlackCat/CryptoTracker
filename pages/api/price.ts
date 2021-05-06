@@ -9,19 +9,19 @@ const mapping = {
 } //as ([Fiat]: string)
 
 export default (req, res) => {
-  const fiat = req.query.fiat || '£'
+  const fiat = mapping[req.query.fiat || '£']
   axios.get(`${URL}/cryptocurrency/quotes/latest`, {
         headers: {
             "X-CMC_PRO_API_KEY": process.env.CMC_API_KEY
         },
         params: {
           id: req.query.id,
-          convert: mapping[fiat]
+          convert: fiat
         }
   }).then(apiRes => {
     const data = apiRes.data.data
     Object.keys(data).forEach(key => {
-      data[key] = data[key]["quote"][mapping[fiat]]["price"]
+      data[key] = data[key]["quote"][fiat]["price"]
     })
     res.status(200).json(data)
   }).catch(e => {
