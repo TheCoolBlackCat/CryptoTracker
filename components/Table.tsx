@@ -82,7 +82,7 @@ export default class Home extends Component<Props, State> {
                     {row.profit > 0 ?
                         <td className="text-success">+{row.profit.toFixed(4)}</td>:
                         <td className="text-danger">{row.profit.toFixed(4)}</td>}
-                    <td>{`${row.ROI.toFixed(4)}%`}</td>
+                    <td>{row.buy === 0 ? "N/A" : `${row.ROI.toFixed(4)}%`}</td>
                     <Prediction {...{price: row.price, holding: row.holding, darkMode, fiat}} />
                 </tr>
             )
