@@ -1,17 +1,17 @@
 import { useState } from "react"
 import useInputState from "../hooks/useInputState"
-import { Currency } from "../types"
 
 
 type Props = {
-    darkMode: boolean,
-    price: number,
+    darkMode: boolean
+    fiat: string
+    price: number
     holding: number
 }
 
 
 export default function Prediction(props: Props) {
-    const {darkMode, price, holding} = props
+    const {darkMode, fiat, price, holding} = props
     const initialPrediction = price * 1.25
     const [prediction, setPrediction] = useState(initialPrediction)
     const [input, setInput] = useInputState(initialPrediction.toFixed(2), () => setPrediction(Number(input)))
@@ -28,7 +28,7 @@ export default function Prediction(props: Props) {
                     value={prediction.toFixed(2)}
                     onChange={e => setInput(e)} />
             </td>
-            <td>£{(prediction*holding).toFixed(4)}</td>
+            <td>{fiat}{(prediction*holding).toFixed(4)}</td>
         </>
     )
 }

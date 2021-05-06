@@ -1,4 +1,5 @@
 type Token = "BTC" | "ETH" | "ZIL"
+type Fiat = '£' | '$'
 
 type Currency = {
     uuid: string
@@ -12,4 +13,4 @@ type Currency = {
     ROI: number
 }
 
-export type {Token, Currency}
+export type {Token, Currency, Fiat}

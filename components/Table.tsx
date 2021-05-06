@@ -1,9 +1,10 @@
 import axios from "axios"
 import { Component } from "react"
-import { Currency } from "../types"
+import { Currency, Fiat } from "../types"
 import Prediction from "./Prediction"
 
 type Props = {
+  fiat: Fiat
   darkMode: boolean
   columns: string[]
   rows: Currency[]
@@ -16,6 +17,10 @@ type State = {
 }
 
 export default class Home extends Component<Props, State> {
+  static defaultProps = {
+      fiat: '£'
+  } as Props
+
   constructor(props: Props) {
       super(props)
       this.state = {
@@ -56,13 +61,14 @@ export default class Home extends Component<Props, State> {
   }
 
   render() {
-    const {darkMode, columns} = this.props
+    const {darkMode, fiat, columns} = this.props
     const {loaded, errored} = this.state
     const loader = errored || (
         <div className="spinner-grow text-warning" role="status">
             <span className="visually-hidden">Loading...</span>
         </div>
     )
+    const sign = (x: string | number) => `${fiat}${x.toString()}`
     const header = columns.map((column, i) => <th scope="col" key={i}>{column}</th>)
     const tableData = this.getData()
     const tableBody = tableData.map(row => {
@@ -72,14 +78,14 @@ export default class Home extends Component<Props, State> {
                 <tr key={row.uuid}>
                     <td scope="row">{row.token}</td>
                     <td>{row.holding}</td>
-                    <td>£{row.buy}</td>
-                    <td>£{row.price.toFixed(4)}</td>
-                    <td>£{(row.value).toFixed(4)}</td>
+                    <td>{sign(row.buy)}</td>
+                    <td>{sign(row.price.toFixed(4))}</td>
+                    <td>{sign(row.value.toFixed(4))}</td>
                     {row.profit > 0 ?
                         <td className="text-success">+{row.profit.toFixed(4)}</td>:
                         <td className="text-danger">{row.profit.toFixed(4)}</td>}
                     <td>{`${row.ROI.toFixed(4)}%`}</td>
-                    <Prediction {...{...row, darkMode}} />
+                    <Prediction {...{...row, darkMode, fiat}} />
                 </tr>
             )
         }
@@ -95,9 +101,9 @@ export default class Home extends Component<Props, State> {
 
     const statsRow = Array.from({length: 9}, () => <td></td>)
     const totalProfit = tableData.reduce((total, row) => total + row.profit, 0)
-    statsRow[2] = <th>{loaded ? `£${tableData.reduce((total, row) => total + row.buy, 0).toFixed(2)}` : loader}</th>
-    statsRow[4] = <th>{loaded ? `£${tableData.reduce((total, row) => total + row.value, 0).toFixed(2)}` : loader}</th>
-    statsRow[5] = <th className={`${totalProfit > 0 ? "text-success" : "text-danger"}`}>{loaded ? `£${totalProfit.toFixed(2)}` : loader}</th>
+    statsRow[2] = <th>{loaded ? sign(`${tableData.reduce((total, row) => total + row.buy, 0).toFixed(2)}`) : loader}</th>
+    statsRow[4] = <th>{loaded ? sign(`${tableData.reduce((total, row) => total + row.value, 0).toFixed(2)}`) : loader}</th>
+    statsRow[5] = <th className={`${totalProfit > 0 ? "text-success" : "text-danger"}`}>{loaded ? sign(`${totalProfit.toFixed(2)}`) : loader}</th>
 
     return (
         <table className={`table table-hover ${darkMode ? "table-dark" : ""}`}>
